@@ -123,10 +123,11 @@ print " "
 print ''' 1：扫描重复文件
  2：显示重复文件
  3：删除重复文件(保留一份)
- 4：退出
+ 4：初始化数据库
+ 9：退出
   '''
 else_in = raw_input("请输入数字：")
-if '4' == else_in:
+if '9' == else_in:
     print "程序退出"
 elif '2' == else_in:
     print '1，输入文件夹路径'
@@ -143,8 +144,10 @@ elif '2' == else_in:
 elif '1' == else_in:
     url_in = raw_input("请输入目录：")
     file_scan(url_in, md5cal,md5compare,file_add)
-elif '3' ==else_in:
+elif '3' == else_in:
     print '删除'
-
+elif '4' == else_in:
+    add_database()
+    print '数据库初始化完成...'
 
 sqlite_conn.close()
