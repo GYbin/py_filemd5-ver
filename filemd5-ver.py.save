@@ -1,0 +1,65 @@
+#!/usr/bin/python
+#-*- coding: UTF-8 -*-
+
+import os
+import sys
+import re
+import sqlite3
+sys.path.append('../ybpy_tool/')
+import ybpy_tool
+ybpy_tool.log_config( log_name ='py_filemd5-ver.log',log_dir = '../../log/') #日志记录位置
+#sqlite_conn = sqlite3.conneet('../../data/py_filemd5-ver/filemd5-ver.db')
+#sqlite_cur = sqlite_conn.cursor()
+#sqlite_cur.execute(''' CREATE TABLE filelist_md5
+#	(id int primary key ,
+#	 file_list text,
+#	 file_name text,
+#         file_md5 text)''')
+#sqlite_cur.execute(''' CREATE TABLE repeat_file
+#	(id int primary key,
+#	 file_list text,
+#	 file_name text,
+#	 file_md5 text)''')
+#sqlite_conn.commit()
+#sqlite_conn.close()
+def md5cal_big(file):
+    m = md5()
+    f = open(file,'rb')
+    buffer = 8192 # why is 8192 | 8192 is fast than 2048
+    while 1:
+        chunk = f.read(buffer)
+        if not chunk : break
+        m.update(chunk)
+    f.close()
+    return m.hexdigest()
+
+def md5cal(file):
+    statinfo = os.stat(file) #获取文件信息
+    if int(statinfo.st_size)/(1024*1024) >= 1000:
+        print "File size >1000 ,move to big file..."
+        return  md5cal_big(file)
+    m = md5()
+    f = open(file,'rb')
+    m.update(f.read())
+    f.close()
+    return m.hexdigest()
+
+def file_scan(path,md5cal = None, md5compare = None ,file_add = None):
+    stack = []
+    ret = []
+    stack.append(path)
+    while len(stack) > 0:
+        tmp = stack.pop(len(stack) - 1)
+        if (os.path.isdir(tmp)):
+            ret.append(tmp)
+            for item in os.listdir(tmp):
+                stack.append(os.path.join(tmp,item))
+            print tmp
+        os.path.isfile(tmp)
+            ret.append(tmp)
+            if md5cal:
+                md5num = md5cal(tmp)
+                print  md5num+ ' 路径：' + tmp
+    return ret
+
+file_scan('/mnt/d/1/')
