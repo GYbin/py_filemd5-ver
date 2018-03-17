@@ -8,7 +8,7 @@ import sqlite3
 from hashlib import md5
 sys.path.append('../ybpy_tool/')
 import ybpy_tool
-run_ecc = 6
+run_ecc = 1
 db_url = '../../data/py_filemd5-ver/filemd5-ver.db'
 ybpy_tool.log_config( log_name ='py_filemd5-ver.log',log_dir = '../../log/') #日志记录位置
 
@@ -141,7 +141,8 @@ elif '2' == else_in:
         url_in = '%' + url_in + '%'
         dis_cf(url_in)
 elif '1' == else_in:
-    print '扫描文件'
+    url_in = raw_input("请输入目录：")
+    file_scan(url_in, md5cal,md5compare,file_add)
 elif '3' ==else_in:
     print '删除'
 
