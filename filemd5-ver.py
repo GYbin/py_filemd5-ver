@@ -54,7 +54,11 @@ def file_add(file,md5num,sql_tab):
     sql_cmd = '''INSERT INTO %s(file_list,file_name,file_md5,run_ecc)\
         VALUES( '%s' ,'%s', '%s', %d) '''%(sql_tab,file_list[0],file_list[1],md5num,run_ecc)
 #    print sql_cmd
-    sqlite_cur.execute( sql_cmd )
+    try :
+        sqlite_cur.execute( sql_cmd )
+    except :
+        ybpy_tool.logger.error('SQL命令行错误：%s',sql_cmd) 
+        return 1
     sqlite_conn.commit()
     return 0
 
