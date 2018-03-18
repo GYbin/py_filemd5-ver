@@ -8,7 +8,7 @@ import sqlite3
 from hashlib import md5
 sys.path.append('../ybpy_tool/')
 import ybpy_tool
-run_ecc = 1
+run_ecc = 5
 db_url = '../../data/py_filemd5-ver/filemd5-ver.db'
 ybpy_tool.log_config( log_name ='py_filemd5-ver.log',log_dir = '../../log/') #日志记录位置
 
@@ -50,14 +50,14 @@ def md5cal(file):
     return m.hexdigest()
 
 def file_add(file,md5num,sql_tab):
-    file_list = os.path.split(file)
+    file_list = os.path.split(file) # 目录与文件名分离
+    list_tmp = [(file_list[0],file_list[1],md5num)]
     sql_cmd = '''INSERT INTO %s(file_list,file_name,file_md5,run_ecc)\
-        VALUES( '%s' ,'%s', '%s', %d) '''%(sql_tab,file_list[0],file_list[1],md5num,run_ecc)
-#    print sql_cmd
+        VALUES( ?,?,'%s',%d) '''% (sql_tab,md5num,run_ecc)
     try :
-        sqlite_cur.execute( sql_cmd )
+        sqlite_cur.execute(sql_cmd,(file_list[0].decode('utf8'),file_list[1].decode('utf8')))
     except :
-        ybpy_tool.logger.error('SQL命令行错误：%s',sql_cmd) 
+        ybpy_tool.logger.error('SQL命令行错误：%s,%s') %(sql_cmd,file)
         return 1
     sqlite_conn.commit()
     return 0
@@ -106,13 +106,36 @@ def file_scan(path,md5cal = None, md5compare = None ,file_add = None):
 
 #file_scan('/mnt/d/1/', md5cal,md5compare,file_add)
 
-def dis_cf( file_list = '%'):
-    sql_cmd = ''' SELECT id,file_list,file_name,file_md5 from repeat_file where file_list LIKE  '%s' ''' % file_list
+def dis_cf( table_name,list_name,file_list = '%'):
+    sql_cmd = ''' SELECT id,file_list,file_name,file_md5 from %s where %s LIKE  '%s' ''' %(table_name,list_name,file_list)
+    print sql_cmd
     sql_num = sqlite_cur.execute(sql_cmd)
     tmp =  sql_num.fetchall()
     for row in tmp:
         #print "ID:"+ str(row[0]) + '目录:' + row[1] +'文件名'+ row[2]
         print row[0],row[1] + u'/'+ row[2],row[3]
+
+def else_in_2():
+    while 1:
+        print '1，重复文件夹路径'
+        print '2，重复文件夹名称'
+        print '3，根据MD5查询文件'
+        print '9，退出'
+        url_in = raw_input("请输入：")
+        if url_in == '9' :
+            return 0
+        elif url_in == '1':
+            url_in = raw_input("请输入路径：")
+            url_in = url_in + '%'
+            dis_cf('repeat_file','file_list',url_in)
+        elif url_in == '2':
+            url_in = raw_input("请输入名称：")
+            url_in = '%' + url_in + '%'
+            dis_cf('repeat_file','file_list',url_in)
+        elif url_in == '3':
+            url_in = raw_input("请输入文件MD5：")
+            dis_cf('filelist_md5','file_md5',url_in)
+
 print """
 
 """
@@ -125,7 +148,7 @@ print " "
 print "程序路径：" + os.getcwd() 
 print " "
 print ''' 1：扫描重复文件
- 2：显示重复文件
+ 2：显示数据库文件
  3：删除重复文件(保留一份)
  4：初始化数据库
  9：退出
@@ -134,17 +157,7 @@ else_in = raw_input("请输入数字：")
 if '9' == else_in:
     print "程序退出"
 elif '2' == else_in:
-    print '1，输入文件夹路径'
-    print '2，输入文件夹名称'
-    url_in = raw_input("请输入：")
-    if url_in == '1' :
-        url_in = raw_input("请输入路径：")
-        url_in = url_in + '%'
-        dis_cf(url_in)
-    else:
-        url_in = raw_input("请输入名称：")
-        url_in = '%' + url_in + '%'
-        dis_cf(url_in)
+    else_in_2()
 elif '1' == else_in:
     url_in = raw_input("请输入目录：")
     file_scan(url_in, md5cal,md5compare,file_add)
