@@ -10,8 +10,8 @@ from hashlib import md5
 from PIL import Image  #计算图片hash
 sys.path.append('../ybpy_tool/')
 import ybpy_tool
-#reload(sys)  #出现编码错误打开
-#sys.setdefaultencoding('utf8')  #出现编码错误打开
+reload(sys)  #出现编码错误打开
+sys.setdefaultencoding('utf8')  #出现编码错误打开
 run_ecc = 5
 db_url = '../../data/py_filemd5-ver/filemd5-ver.db'
 ybpy_tool.log_config( log_name ='py_filemd5-ver.log',log_dir = '../../log/') #日志记录位置
@@ -68,7 +68,7 @@ def md5cal(file_tmp): #计算小文件MD5
     return m.hexdigest()
 
 def photo_md5cal(file_path):
-    hash = imagehash.average_hash(Image.open(file_path))
+    hash = imagehash.phash(Image.open(file_path))
     return hash
 
 def file_add(file_tmp,md5num,sql_tab): #文件MD5入库
