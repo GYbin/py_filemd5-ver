@@ -8,7 +8,8 @@ import sqlite3
 import imagehash  #计算图片hash
 from hashlib import md5
 from PIL import Image  #计算图片hash
-Image.LOAD_TRUNCATED_IMAGES = True
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 sys.path.append('../ybpy_tool/')
 import ybpy_tool
 reload(sys)  #出现编码错误打开
@@ -216,7 +217,7 @@ def else_in_6():#显示数据库重复文件
                 print sql_tmp[0],sql_tmp[1] + u'/'+ sql_tmp[2],sql_tmp[3]
         elif url_in == '6':
             url_in = raw_input("请输入文件MD5：")
-            for sql_tmp in dis_cf('repeat_photo','file_md5',url_in):
+            for sql_tmp in dis_cf('photo_md5','file_md5',url_in):
                 print sql_tmp[0],sql_tmp[1] + u'/'+ sql_tmp[2],sql_tmp[3]
 
 def slse_in7(): #各种删除操作
@@ -284,6 +285,7 @@ def slse_in7():
             print '删除SQL记录成功'
             sqlite_conn.commit()
         elif url_in == '4':
+            print dis_cf('repeat_photo','file_list','%')
             for sql_tmp in dis_cf('repeat_photo','file_list','%'):
                 del_sqljl( 'repeat_photo','id',sql_tmp[0])
                 print sql_tmp[1] + u'/'+ sql_tmp[2]
