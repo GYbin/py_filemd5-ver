@@ -8,7 +8,7 @@ import sqlite3
 import imagehash  #计算图片hash
 from hashlib import md5
 from PIL import Image  #计算图片hash
-ImageFile.LOAD_TRUNCATED_IMAGES = True
+Image.LOAD_TRUNCATED_IMAGES = True
 sys.path.append('../ybpy_tool/')
 import ybpy_tool
 reload(sys)  #出现编码错误打开
