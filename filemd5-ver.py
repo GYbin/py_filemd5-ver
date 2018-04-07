@@ -8,8 +8,8 @@ import sqlite3
 import imagehash  #计算图片hash
 from hashlib import md5
 from PIL import Image  #计算图片hash
-from PIL import ImageFile
-ImageFile.LOAD_TRUNCATED_IMAGES = True
+from PIL import ImageFile #避免出现image file is truncated (41 bytes not processed)
+ImageFile.LOAD_TRUNCATED_IMAGES = True #避免出现image file is truncated (41 bytes not processed)
 sys.path.append('../ybpy_tool/')
 import ybpy_tool
 reload(sys)  #出现编码错误打开
@@ -168,6 +168,17 @@ def del_sqljl( table_name,list_name,file_list= '%'): #删除sql记录
     tmp = sql_num.fetchall()
     return tmp
 
+
+def del_wxsqljl(database):
+    for sql_tmp in dis_cf( database ,'file_list'):
+        if os.path.exists(sql_tmp[1] + u'/'+ sql_tmp[2]):
+            print "图片存在"
+            print sql_tmp[1] + u'/'+ sql_tmp[2]
+        else:
+            del_sqljl( 'database','id',sql_tmp[0])
+            print '删除SQL记录成功'
+
+
 def del_filecf(cffile_name): #删除文件
     try:
     #print " 删除成功：%s" %cffile_name
@@ -220,12 +231,16 @@ def else_in_6():#显示数据库重复文件
             for sql_tmp in dis_cf('photo_md5','file_md5',url_in):
                 print sql_tmp[0],sql_tmp[1] + u'/'+ sql_tmp[2],sql_tmp[3]
 
-def slse_in7(): #各种删除操作
+def slse_in7():
     while 1:
         print '''        1,删除指定重复文件
-        2,删除重复数据库中记录
-        7,清理重复数据库无效记录
-        8,显示数据库中全部重复文件
+        2,删除指定重复图片
+        3,清理数据库无效记录
+        5,清除MD5文件数据库
+        6,清除重复文件数据库
+        7,清除图片数据库
+        8,清除重复图片数据库
+        0,清理MD5数据库无效记录
         9,退出'''
         url_in = raw_input('请输入：')
         if url_in == '9':
@@ -238,53 +253,38 @@ def slse_in7(): #各种删除操作
                del_filecf(file_listtmp)
         elif url_in == '2':
            url_in = raw_input('请输入路径:')
-           for sql_tmp in dis_cf('repeat_file','file_list',url_in):
-               del_sqljl( 'repeat_file','id',sql_tmp[0])  
-               print '删除SQL记录成功'
-               print sql_tmp[1] + u'/'+ sql_tmp[2] 
+           url_in = url_in + '%'
+           for sql_tmp in dis_cf('repeat_photo','file_list',url_in):
+               file_listtmp = sql_tmp[1] + u'/'+ sql_tmp[2]
+               del_filecf(file_listtmp)
+        elif url_in =='3':
+           del_wxsqljl('repeat_file')
            sqlite_conn.commit()
-        elif url_in =='7':
-           for sql_tmp in dis_cf('repeat_file','file_list'):
-               if os.path.exists(sql_tmp[1] + u'/'+ sql_tmp[2]):
-                   print "文件存在"
-                   print sql_tmp[1] + u'/'+ sql_tmp[2]
-               else:
-                   del_sqljl( 'repeat_file','id',sql_tmp[0])
-                   print '删除SQL记录成功'
+           del_wxsqljl('repeat_photo')
            sqlite_conn.commit()
-        elif url_in == '8':
-             for sql_tmp in dis_cf('repeat_file','file_list','%'):
-                 print sql_tmp[0],sql_tmp[1] + u'/'+ sql_tmp[2],sql_tmp[3]
- 
-def slse_in7():
-    while 1:
-        print '''        1,清除MD5文件数据库
-        2,清除重复文件数据库
-        3,清除图片数据库
-        4,清除重复图片数据库
-        9,退出'''
-        url_in = raw_input('请输入：')
-        if url_in == '9':
-            return 0
-        elif url_in == '1':
+           del_wxsqljl('filelist_md5')
+           sqlite_conn.commit()
+           del_wxsqljl('repeat_photo')
+           sqlite_conn.commit()
+        elif url_in == '5':
             for sql_tmp in dis_cf('filelist_md5','file_list','%'):
                 del_sqljl( 'filelist_md5','id',sql_tmp[0])
                 print sql_tmp[1] + u'/'+ sql_tmp[2] 
             print '删除SQL记录成功'
             sqlite_conn.commit()
-        elif url_in == '2':
+        elif url_in == '6':
             for sql_tmp in dis_cf('repeat_file','file_list','%'):
                 del_sqljl( 'repeat_file','id',sql_tmp[0])
                 print sql_tmp[1] + u'/'+ sql_tmp[2]
             print '删除SQL记录成功'
             sqlite_conn.commit()
-        elif url_in == '3':
+        elif url_in == '7':
             for sql_tmp in dis_cf('photo_md5','file_list','%'):
                 del_sqljl( 'photo_md5','id',sql_tmp[0])
                 print sql_tmp[1] + u'/'+ sql_tmp[2]
             print '删除SQL记录成功'
             sqlite_conn.commit()
-        elif url_in == '4':
+        elif url_in == '8':
             print dis_cf('repeat_photo','file_list','%')
             for sql_tmp in dis_cf('repeat_photo','file_list','%'):
                 del_sqljl( 'repeat_photo','id',sql_tmp[0])
